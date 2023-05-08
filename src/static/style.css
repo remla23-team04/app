@@ -1,0 +1,14 @@
+body {
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    text-align: center;
+    font-family: "Comic Sans MS", sans-serif;
+}
+
+textarea {
+    resize: vertical;
+    border: 1px solid black;
+    border-radius: 5px;
+    padding: 5px;
+}

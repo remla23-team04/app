@@ -3,23 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/style.css">
     <title>Restaurant Review</title>
 </head>
 <body>
     <h1>Write a Review</h1>
     <form id="reviewForm">
-        <label for="review">Restaurant Review:</label><br>
-        <textarea id="review" rows="4" cols="50"></textarea><br>
-        <button type="submit">Submit</button>
+        <label for="review">Type your review below:</label>
+        <br><br>
+        <textarea id="review" rows="8" cols="70" ></textarea>
+        <br>
     </form>
-    <h1>The review is:</h1>
-    <div id="sentimentResult"></div>
+    <h1>The review is <span id="sentimentResult">...</span></h1>
     <script>
         const predictionEndpoint = '/predict';
 
         document.getElementById('reviewForm').addEventListener('keyup', async (event) => {
             // event.preventDefault();
             const review = document.getElementById('review').value;
+            const resultDiv = document.getElementById('sentimentResult')
 
             if (review) {
                 try {
@@ -35,15 +37,14 @@
                         const data = await response.json();
                         console.log(data);
                         const sentiment = data.sentiment;
-                        const resultDiv = document.getElementById('sentimentResult');
                         resultDiv.innerHTML = '';
 
                         if (sentiment === 'positive') {
-                            resultDiv.innerHTML = ':) Positive';
+                            resultDiv.innerHTML = 'positive :)';
                         } else if (sentiment === 'negative') {
-                            resultDiv.innerHTML = ':( Negative';
+                            resultDiv.innerHTML = 'negative :(';
                         } else {
-                            resultDiv.innerHTML = 'Error: Invalid sentiment response';
+                            resultDiv.innerHTML = '[Error: Invalid sentiment response]';
                         }
                     } else {
                         console.error('Error:', response.statusText);
@@ -51,6 +52,8 @@
                 } catch (error) {
                     console.error('Error:', error);
                 }
+            } else {
+                resultDiv.innerHTML = "..."
             }
         });
     </script>

@@ -37,4 +37,4 @@ def predict():
 
 if __name__ == '__main__':
     # host 0.0.0.0 to listen to all ip's
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0',port = 5000)

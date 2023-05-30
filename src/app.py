@@ -9,9 +9,9 @@ os.environ.setdefault('MODEL_SERVICE_URL', 'http://model-service:5001')
 API_HOST = os.environ.get('MODEL_SERVICE_URL');
 assert API_HOST, 'Envvar API_HOST is required'
 
-predictions_counter = Counter("predictions_counter", "The number of predictions submitted")
-wrong_predictions = Counter("wrong_predictions", "The number of wrong predictions")
-correct_predictions = Counter("correct_predictions", "The number of correct predictions")
+predictions_counter = Counter("predictions_counter", "The number of predictions submitted to the app")
+wrong_predictions = Counter("wrong_predictions", "The number of wrong predictions registered by the app")
+correct_predictions = Counter("correct_predictions", "The number of correct predictions registered by the app")
 
 
 @app.route('/')

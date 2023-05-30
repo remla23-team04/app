@@ -14,12 +14,24 @@
         <textarea id="review" rows="8" cols="70" ></textarea>
         <br>
     </form>
+    <button id="submitButton">Submit</button>
     <h1>The review is <span id="sentimentResult">...</span></h1>
+
+    <div id="evaluationContainer" style="display: none;">
+        <h2>Is the prediction correct?</h2>
+        <button id="correctButton">Correct</button>
+        <button id="incorrectButton">Incorrect</button>
+    </div>
     <script>
         const predictionEndpoint = '/predict';
+        const evaluationContainer = document.getElementById('evaluationContainer');
+        const correctButton = document.getElementById('correctButton');
+        const incorrectButton = document.getElementById('incorrectButton');
+        const correctEndpoint = '/evaluation/correct';
+        const wrongEndpoint = '/evaluation/wrong';
 
-        document.getElementById('reviewForm').addEventListener('keyup', async (event) => {
-            // event.preventDefault();
+        document.getElementById('submitButton').addEventListener('click', async (event) => {
+            event.preventDefault();
             const review = document.getElementById('review').value;
             const resultDiv = document.getElementById('sentimentResult')
 
@@ -46,6 +58,7 @@
                         } else {
                             resultDiv.innerHTML = '[Error: Invalid sentiment response]';
                         }
+                        evaluationContainer.style.display = 'block';
                     } else {
                         console.error('Error:', response.statusText);
                     }
@@ -55,6 +68,49 @@
             } else {
                 resultDiv.innerHTML = "..."
             }
+        });
+        correctButton.addEventListener('click', async () => {
+            try {
+                const response = await fetch(correctEndpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({}),
+                });
+
+                if (response.ok) {
+                    console.log("Correct evaluation sent successfully");
+                } else {
+                    console.error('Error:', response.statusText);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+
+            evaluationContainer.style.display = 'none';
+        });
+
+        incorrectButton.addEventListener('click', async () => {
+            try {
+                const response = await fetch(wrongEndpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({}),
+                });
+
+                if (response.ok) {
+                    console.log("Incorrect evaluation sent successfully");
+                } else {
+                    console.error('Error:', response.statusText);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+
+            evaluationContainer.style.display = 'none';
         });
     </script>
 </body>

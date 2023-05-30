@@ -10,6 +10,8 @@ API_HOST = os.environ.get('MODEL_SERVICE_URL');
 assert API_HOST, 'Envvar API_HOST is required'
 
 predictions_counter = Counter("predictions_counter", "The number of predictions submitted")
+wrong_predictions = Counter("wrong_predictions", "The number of wrong predictions")
+correct_predictions = Counter("correct_predictions", "The number of correct predictions")
 
 
 @app.route('/')
@@ -40,6 +42,16 @@ def predict():
     ]
 
     return Response(res.content, res.status_code, headers)
+
+
+@app.post('/evaluation/wrong')
+def handle_wrong():
+    wrong_predictions.inc()
+
+
+@app.post('/evaluation/correct')
+def handle_correct():
+    correct_predictions.inc()
 
 
 @app.route('/metrics', methods=['GET'])

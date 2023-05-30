@@ -5,7 +5,7 @@ from prometheus_client import Counter, generate_latest, REGISTRY
 
 app = Flask(__name__)
 
-os.environ.setdefault('MODEL_SERVICE_URL', 'http://model-service:5000')
+os.environ.setdefault('MODEL_SERVICE_URL', 'http://model-service:5001')
 API_HOST = os.environ.get('MODEL_SERVICE_URL');
 assert API_HOST, 'Envvar API_HOST is required'
 
@@ -47,11 +47,13 @@ def predict():
 @app.post('/evaluation/wrong')
 def handle_wrong():
     wrong_predictions.inc()
+    return Response()
 
 
 @app.post('/evaluation/correct')
 def handle_correct():
     correct_predictions.inc()
+    return Response()
 
 
 @app.route('/metrics', methods=['GET'])

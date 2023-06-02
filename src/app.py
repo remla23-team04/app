@@ -1,7 +1,8 @@
 from flask import Flask, request, Response, jsonify, render_template
 import requests
 import os
-from prometheus_client import Counter, generate_latest, REGISTRY
+import json
+from prometheus_client import Counter, Gauge, Histogram, Summary, generate_latest, REGISTRY
 
 app = Flask(__name__)
 
@@ -13,6 +14,20 @@ predictions_counter = Counter("predictions_counter", "The number of predictions 
 wrong_predictions = Counter("wrong_predictions", "The number of wrong predictions")
 correct_predictions = Counter("correct_predictions", "The number of correct predictions")
 
+# TODO: update Gauge (average sentiment score)
+average_sentiment_score_gauge = Gauge("average_sentiment_score",
+                                      "The average sentiment score (scale in between ... to ...)")
+# TODO: update Histogram (length of review)
+length_of_review_histogram = Histogram("length_of_review", "The length of reviews")
+
+# TODO: update Summary (positive-to-negative ration)
+positive_to_negative_ratio_summary = Summary("positive_to_negative_ratio",
+                                             "The ratio between positive and negative reviews")
+
+last_review = None
+last_predicted_sentiment = None
+positive_count = 0
+negative_count = 0
 
 @app.route('/')
 def root():
@@ -25,12 +40,16 @@ def root():
 
 @app.route('/predict', methods=['POST'])
 def predict():
+    global last_review, last_predicted_sentiment
+
     predictions_counter.inc()
+
+    user_input = request.get_data()
 
     res = requests.post(
         url=request.url.replace(request.host_url, f'{API_HOST}/'),
         headers=request.headers,
-        data=request.get_data(),
+        data=user_input,
         cookies=request.cookies,
         allow_redirects=False,
     )
@@ -40,6 +59,19 @@ def predict():
         (k, v) for k, v in res.raw.headers.items()
         if k.lower() not in excluded_headers
     ]
+
+    request_data = json.loads(user_input)
+    review = request_data["review"]
+
+    response_data = json.loads(res.content)
+
+    # Debugging stuff
+    with open('/debugging_output.txt', 'w') as f:
+        f.write("sentiment: " + str(response_data["sentiment"]) + "\n")
+        f.write("review: " + str(review) + "\n")
+
+    last_predicted_sentiment = response_data["sentiment"]
+    last_review = review
 
     return Response(res.content, res.status_code, headers)
 
@@ -52,10 +84,24 @@ def handle_wrong():
 
 @app.post('/evaluation/correct')
 def handle_correct():
+    ## Only updating other metrics when the prediction is correct
+    global positive_count, negative_count
+
     # TODO: update Gauge (average sentiment score)
+
     # TODO: update Histogram (length of review)
-    # TODO: update Summary (positive-to-negative ration)
+
     correct_predictions.inc()
+
+    # TODO: update Summary (positive-to-negative ration)
+    if last_predicted_sentiment == 'positive':
+        positive_count += 1
+    elif last_predicted_sentiment == 'negative':
+        negative_count += 1
+    # Update summary metric with counts
+    positive_to_negative_ratio_summary.labels(sentiment='positive').observe(positive_count)
+    positive_to_negative_ratio_summary.labels(sentiment='negative').observe(negative_count)
+
     return Response()
 
 

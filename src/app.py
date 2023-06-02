@@ -52,6 +52,9 @@ def handle_wrong():
 
 @app.post('/evaluation/correct')
 def handle_correct():
+    # TODO: update Gauge (average sentiment score)
+    # TODO: update Histogram (length of review)
+    # TODO: update Summary (positive-to-negative ration)
     correct_predictions.inc()
     return Response()
 
